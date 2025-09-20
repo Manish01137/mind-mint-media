@@ -29,9 +29,12 @@
           </div>
         </div>
 
-        <h1>🚀 Scale Your Business with Guaranteed 80–120 Leads Per Month</h1>
+        <h1 class="hero-multicolor">
+          🚀 <span class="blue">Scale</span> Your <span class="purple">Business</span> 
+          with Guaranteed <span class="orange">80–120 Leads</span> Per Month
+        </h1>
         <p class="sub">We don’t just get likes — we bring paying customers.</p>
-
+        
         <div class="cta-row">
           <a class="btn btn-primary"
              href="https://wa.me/917016300524?text=Hi%20I%20am%20interested%20in%20your%20services"
@@ -214,45 +217,127 @@
 
   <!-- JS -->
   <script>
-    // FAQ toggle (accessible)
-    document.querySelectorAll('.faq-question').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const open = btn.getAttribute('aria-expanded') === 'true';
-        document.querySelectorAll('.faq-question').forEach(b => {
-          b.setAttribute('aria-expanded', 'false');
-          if (b.nextElementSibling) b.nextElementSibling.style.maxHeight = null;
+    (function () {
+      /* FAQ: smooth accessible toggle (click + keyboard), single-open behavior,
+         nice max-height animation and no jumpy transitions. */
+    
+      const faqButtons = Array.from(document.querySelectorAll('.faq-question'));
+    
+      // Initialize: ensure aria attributes + collapsed state
+      faqButtons.forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+        const ans = btn.nextElementSibling;
+        if (ans) {
+          ans.style.maxHeight = '0';
+          ans.style.overflow = 'hidden';
+          ans.style.transition = 'max-height 280ms ease';
+        }
+    
+        // keyboard activation (Enter / Space)
+        btn.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            btn.click();
+          }
         });
-        if (!open) {
+      });
+    
+      // Close all FAQs helper
+      function closeAll(exceptBtn = null) {
+        faqButtons.forEach(b => {
+          if (b === exceptBtn) return;
+          if (b.getAttribute('aria-expanded') === 'true') {
+            toggleFAQ(b, false);
+          }
+        });
+      }
+    
+      // Toggle single FAQ (open boolean = true to open, false to close)
+      function toggleFAQ(btn, open) {
+        const ans = btn.nextElementSibling;
+        if (!ans) return;
+    
+        if (open) {
+          // First collapse others
+          closeAll(btn);
+    
           btn.setAttribute('aria-expanded', 'true');
-          const ans = btn.nextElementSibling;
+    
+          // set to measured height to animate open
           ans.style.maxHeight = ans.scrollHeight + 'px';
-        }
-      });
-    });
-
-    // Sticky CTA show/hide on scroll
-    (function(){
-      const sticky = document.getElementById('stickyCta');
-      const showAfter = 220;
-      const closed = sessionStorage.getItem('stickyClosed') === '1';
-      if (closed) { sticky.style.display = 'none'; return; }
-
-      window.addEventListener('scroll', () => {
-        if (window.scrollY > showAfter) {
-          sticky.classList.add('show');
-          sticky.setAttribute('aria-hidden','false');
+    
+          // after transition, clear maxHeight so content can grow naturally
+          const done = () => {
+            // only clear if still expanded
+            if (btn.getAttribute('aria-expanded') === 'true') {
+              ans.style.maxHeight = 'none';
+            }
+            ans.removeEventListener('transitionend', done);
+          };
+          ans.addEventListener('transitionend', done);
         } else {
-          sticky.classList.remove('show');
-          sticky.setAttribute('aria-hidden','true');
+          // ensure we have a fixed starting height to animate from
+          // if maxHeight was 'none', set it to scrollHeight first
+          if (ans.style.maxHeight === 'none' || !ans.style.maxHeight) {
+            ans.style.maxHeight = ans.scrollHeight + 'px';
+          }
+    
+          // force a paint then animate to 0
+          requestAnimationFrame(() => {
+            btn.setAttribute('aria-expanded', 'false');
+            ans.style.maxHeight = '0';
+          });
         }
-      }, { passive: true });
-
-      // optional double-click to close permanently in session
-      sticky.addEventListener('dblclick', () => {
-        sticky.style.display = 'none';
-        sessionStorage.setItem('stickyClosed', '1');
+      }
+    
+      // Attach click handlers
+      faqButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const isOpen = btn.getAttribute('aria-expanded') === 'true';
+          toggleFAQ(btn, !isOpen);
+        });
       });
+    
+      /* Sticky CTA show/hide logic (kept and cleaned)
+         - show after scrolling past threshold
+         - dblclick hides it for the session (same behavior as before)
+      */
+      (function stickyHandler() {
+        const sticky = document.getElementById('stickyCta');
+        if (!sticky) return;
+    
+        const showAfter = 220;
+        const closed = sessionStorage.getItem('stickyClosed') === '1';
+        if (closed) { sticky.style.display = 'none'; return; }
+    
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+          if (!ticking) {
+            window.requestAnimationFrame(() => {
+              if (window.scrollY > showAfter) {
+                sticky.classList.add('show');
+                sticky.setAttribute('aria-hidden', 'false');
+              } else {
+                sticky.classList.remove('show');
+                sticky.setAttribute('aria-hidden', 'true');
+              }
+              ticking = false;
+            });
+            ticking = true;
+          }
+        }, { passive: true });
+    
+        sticky.addEventListener('dblclick', () => {
+          sticky.style.display = 'none';
+          sessionStorage.setItem('stickyClosed', '1');
+        });
+      })();
+    
+      // Optional: expand first FAQ on load? (commented out)
+      // if (faqButtons[0]) toggleFAQ(faqButtons[0], true);
+    
     })();
-  </script>
+    </script>
+    
 </body>
 </html>
