@@ -476,7 +476,7 @@ p, li, .whom-item span, .achievement p, .contact-details p { font-size:16px; fon
 
 /* WhatsApp CTA - bigger + bolder */
 .btn-primary {
-  font-size: 25px;         /* much larger */
+  font-size: 30px;         /* much larger */
   font-weight: 900;
   padding: 25px 44px;      /* more padding for button size */
   border-radius: 999px;
@@ -2254,7 +2254,7 @@ color: transparent;
 }
 
 .btn-primary {
-  font-size: 20px;
+  font-size: 40px;
   padding: 16px 34px;
   border-radius: 999px;
   background: linear-gradient(90deg, #00bfff, #0077b6);
